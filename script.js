@@ -1,7 +1,12 @@
-const todos = [];
 const list = document.getElementById('todo-list');
 const itemCountSpan = document.getElementById('item-count');
 const uncheckedCountSpan = document.getElementById('unchecked-count');
+const todosKey = 'todosAppItems';
+let todos = JSON.parse(localStorage.getItem(todosKey)) || [];
+
+function saveTodos() {
+    localStorage.setItem(todosKey, JSON.stringify(todos));
+}
 
 function newTodo() {
     const task = prompt("Enter new TODO:");
@@ -11,6 +16,7 @@ function newTodo() {
         todos.push(newTodo);
         render();
         updateCounters();
+        saveTodos();
     }
 }
 
@@ -18,7 +24,7 @@ function renderTodo(todo) {
     const checked = todo.completed ? 'checked' : '';
     const textStyle = todo.completed ? 'text-success text-decoration-line-through' : '';
     return `
-        <li class="list-group-item" id="todo-${todo.id}">
+        <li class="list-group-item">
             <input type="checkbox" class="form-check-input me-2" ${checked} onclick="checkTodo(${todo.id})" />
             <span class="${textStyle}">${todo.text}</span>
             <button class="btn btn-danger btn-sm float-end" onclick="deleteTodo(${todo.id})">delete</button>
@@ -27,8 +33,7 @@ function renderTodo(todo) {
 }
 
 function render() {
-    const todoListHTML = todos.map(renderTodo).join('');
-    list.innerHTML = todoListHTML;
+    list.innerHTML = todos.map(renderTodo).join('');
 }
 
 function updateCounters() {
@@ -39,12 +44,10 @@ function updateCounters() {
 }
 
 function deleteTodo(id) {
-    const todoIndex = todos.findIndex(todo => todo.id === id);
-    if (todoIndex > -1) {
-        todos.splice(todoIndex, 1);
-        render();
-        updateCounters();
-    }
+    todos = todos.filter(todo => todo.id !== id);
+    render();
+    updateCounters();
+    saveTodos();
 }
 
 function checkTodo(id) {
@@ -53,6 +56,7 @@ function checkTodo(id) {
         todo.completed = !todo.completed;
         render();
         updateCounters();
+        saveTodos();
     }
 }
 
